@@ -107,7 +107,24 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     fig.show()
 
     # Question 4: Decision surface with weighted samples
-    raise NotImplementedError()
+    fig = make_subplots(rows=1, cols=2, subplot_titles=["Iteration 1", f"Iteration {n_learners}"])
+
+    # Iteration 1 (first learner)
+    fig.add_trace(decision_surface(model.models_[0].predict, lims[0], lims[1]), row=1, col=1)
+    marker_size = 10 * model.D_[0] / np.max(model.D_[0])
+    fig.add_trace(go.Scatter(x=train_X[:, 0], y=train_X[:, 1], mode='markers', marker=dict(size=marker_size, color=train_y, colorscale=['blue', 'red'])), row=1, col=1)
+    fig.update_xaxes(title_text="x1", row=1, col=1)
+    fig.update_yaxes(title_text="x2", row=1, col=1)
+    
+    # Final iteration
+    fig.add_trace(decision_surface(model.predict, lims[0], lims[1]), row=1, col=2)
+    marker_size = 10 * model.D_[-1] / np.max(model.D_[-1])  # Size markers based on weights
+    fig.add_trace(go.Scatter(x=train_X[:, 0], y=train_X[:, 1], mode='markers', marker=dict(size=marker_size, color=train_y, colorscale=['blue', 'red'])), row=1, col=2)
+    fig.update_xaxes(title_text="x1", row=1, col=2)
+    fig.update_yaxes(title_text="x2", row=1, col=2)
+
+    fig.update_layout(height=400, width=800, title_text="Decision Surfaces and Weighted Samples (Noise Ratio = {})".format(noise))
+    fig.show()
 
 
 if __name__ == '__main__':
