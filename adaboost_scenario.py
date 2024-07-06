@@ -74,9 +74,22 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     fig.show()
 
     # Question 2: Plotting decision surfaces
+    # Question 2: Plotting decision surfaces
     T = [5, 50, 100, 250]
     lims = np.array([np.r_[train_X, test_X].min(axis=0), np.r_[train_X, test_X].max(axis=0)]).T + np.array([-.1, .1])
-    raise NotImplementedError()
+
+    fig = make_subplots(rows=2, cols=2, subplot_titles=[f"T = {t}" for t in T])
+    for i, t in enumerate(T):
+        row, col = divmod(i, 2)
+        partial_model = lambda X: model.partial_predict(X, t)  # Function to predict using first t learners
+        fig.add_trace(decision_surface(partial_model, lims[0], lims[1]), row=row + 1, col=col + 1)
+        
+        # Plot training samples
+        fig.add_trace(go.Scatter(x=train_X[:, 0], y=train_X[:, 1], mode='markers', 
+                                 marker=dict(color=train_y, colorscale=['blue', 'red'])), row=row + 1, col=col + 1)
+
+    fig.update_layout(height=800, width=800, title_text="Decision Surfaces for Different T (Noise Ratio = {})".format(noise))
+    fig.show()
 
     # Question 3: Decision surface of best performing ensemble
     raise NotImplementedError()
