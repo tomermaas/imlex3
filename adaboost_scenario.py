@@ -74,7 +74,6 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     fig.show()
 
     # Question 2: Plotting decision surfaces
-    # Question 2: Plotting decision surfaces
     T = [5, 50, 100, 250]
     lims = np.array([np.r_[train_X, test_X].min(axis=0), np.r_[train_X, test_X].max(axis=0)]).T + np.array([-.1, .1])
 
@@ -92,7 +91,20 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     fig.show()
 
     # Question 3: Decision surface of best performing ensemble
-    raise NotImplementedError()
+        best_T = np.argmin(test_errors) + 1  # +1 because we started at T=1
+    best_model = lambda X: model.partial_predict(X, best_T)
+
+    fig = make_subplots(rows=1, cols=2, subplot_titles=["Train Data", "Test Data"])
+    for i, (X, y, title) in enumerate(zip([train_X, test_X], [train_y, test_y], ["Train Data", "Test Data"])):
+        fig.add_trace(decision_surface(best_model, lims[0], lims[1]), row=1, col=i + 1)
+        fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers', 
+                                 marker=dict(color=y, colorscale=['blue', 'red'])), row=1, col=i + 1)
+
+        fig.update_xaxes(title_text="x1", row=1, col=i + 1)
+        fig.update_yaxes(title_text="x2", row=1, col=i + 1)
+
+    fig.update_layout(height=400, width=800, title_text="Decision Surface of Best Ensemble (Noise Ratio = {})".format(noise))
+    fig.show()
 
     # Question 4: Decision surface with weighted samples
     raise NotImplementedError()
