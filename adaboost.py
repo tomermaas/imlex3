@@ -56,19 +56,27 @@ class AdaBoost(BaseEstimator):
             Responses of input data to fit to
         """
         n_samples = len(y)
-        D = np.full(n_samples, 1 / n_samples)  # Initialize sample weights
+        D = np.full(n_samples, 1 / n_samples)
         self.models_, self.weights_, self.D_ = [], [], []
-        for t in range(self.iterations_):
-            self.D_.append(D.copy())  # Store sample weights for this iteration
 
-            # Train a weak learner
-            model = self.wl_().fit(X, y)
+        # Create a single DecisionStump instance
+        model = self.wl_()
+
+        for t in range(self.iterations_):
+            self.D_.append(D.copy())
+
+            # Re-initialize the DecisionStump parameters
+            model.threshold_ = None
+            model.j_ = None
+            model.sign_ = None
+
+            # Train the same weak learner with the updated weights
+            model.fit(X, y)
             y_pred = model.predict(X)
 
             # Calculate error and alpha - WITH CORRECTION FOR ZERO ERROR
             epsilon = np.sum(D[y_pred != y])
             err = epsilon / np.sum(D)
-            # correction factor for zero error case
             if err == 0:
                 err = 1e-10
 
@@ -79,8 +87,9 @@ class AdaBoost(BaseEstimator):
             D /= np.sum(D)  # Normalize weights
 
             # Store model and weight
-            self.models_.append(model)
+            self.models_.append(model)  # This will append a reference to the same model object
             self.weights_.append(alpha)
+
 
 
     def _predict(self, X):
